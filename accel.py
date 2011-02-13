@@ -20,18 +20,24 @@ def avg(values):
 
 ser = serial.Serial('/dev/ttyACM0',115200,timeout=1)
 
-#Start access point
+# start access point
 ser.write(startAccessPoint())
 
+# initialise counters and such
+
+SMOOTH = 5
+STAT_SENS = 3
+
+configcount = -100
 counter = 0
-configcount = 0
-normal = []
+stat = []
 xlog = []
 ylog = []
 zlog = []
 
+
 while 1:
-    #Send request for acceleration data
+    # send request for acceleration data
     ser.write(accDataRequest())
     accel = ser.read(7)
 
@@ -40,9 +46,13 @@ while 1:
 	y = ord(accel[1])
 	z = ord(accel[2])
 
+	# set 0 as midpoint
+
 	x -= 128
 	y -= 128
 	z -= 128
+
+	# data smoothing of five values
 
 	xlog.append(x)
 	ylog.append(y)
@@ -51,39 +61,46 @@ while 1:
 	counter += 1
 	configcount += 1
 
-	# average last five movements	
+	# delay printing of values until config is done
 
-
-	if configcount < 100:
+	if configcount < 0:
 		counter = 0
 	
-	if configcount == 100:
+	# config figures out stationary position
+
+	if configcount == 0:
 		counter = 0
-		normal.extend([round(avg(xlog)),round(avg(ylog)),round(avg(zlog))])
-		print "Stationary position: " + str(normal)
+		stat.extend([round(avg(xlog)),round(avg(ylog)),round(avg(zlog))])
+		print str(configcount) + " Stationary values: " + str(stat)
 		
 
-	if counter == 5:
-		counter = 0
-		px = round(avg(xlog)) - normal[0]
-		py = round(avg(ylog)) - normal[1] 
-		pz = round(avg(zlog)) - normal[2] 
+	# print smoothed values
 
-		if (abs(px) + abs(py) + abs(pz)) < 20:
-			print "Stationary."
+	if counter == SMOOTH:
+		counter = 0
+		px = round(avg(xlog)) - stat[0]
+		py = round(avg(ylog)) - stat[1] 
+		pz = round(avg(zlog)) - stat[2] 
+
+		# if not much change, probably stationary
+
+		if (abs(px) or abs(py) or abs(pz)) < STAT_SENS:
+			print str(configcount) + " Stationary."
+
+		# otherwise, print accel values
+
 		else:
-			print "x: " + str(px) + " y: " + str(py) + " z: " + str(pz)
+
+			print str(configcount) + " " + str([px,py,pz])
 
 
 		del xlog[:]
 		del ylog[:]
 		del zlog[:]
 
-	# if motion is detected, print motion
-	# if not much motion is detection, print stationary
-
     if heardEnter():
 	print "Thanks for playing!"
 	ser.close()
 	sys.exit(0)
+
 ser.close()
