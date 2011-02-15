@@ -18,6 +18,15 @@ def avg(values):
 	return sum(values, 0.0) / len(values)
 
 
+def performGesture(gestureID):
+	print "Now perform your gesture. Return to the stationary position when you are done."
+	print "If you'd like to perform a gesture again, just press enter."
+
+	while 1:
+		if heardEnter():
+			return False	
+		return True
+
 ser = serial.Serial('/dev/ttyACM0',115200,timeout=1)
 
 # start access point
@@ -30,21 +39,21 @@ STAT_SENS = 3
 
 configcount = -100
 counter = 0
+statcount = 0
 stat = []
 xlog = []
 ylog = []
 zlog = []
 
-
 while 1:
-    # send request for acceleration data
-    ser.write(accDataRequest())
-    accel = ser.read(7)
+    	# send request for acceleration data
+    	ser.write(accDataRequest())
+    	accel = ser.read(7)
 
-    if ord(accel[0]) != 0 and ord(accel[1]) != 0 and ord(accel[2]) != 0:
-	x = ord(accel[0])
-	y = ord(accel[1])
-	z = ord(accel[2])
+    	if ord(accel[0]) != 0 and ord(accel[1]) != 0 and ord(accel[2]) != 0:
+		x = ord(accel[0])
+		y = ord(accel[1])
+		z = ord(accel[2])
 
 	# set 0 as midpoint
 
@@ -86,6 +95,16 @@ while 1:
 
 		if (abs(px) or abs(py) or abs(pz)) < STAT_SENS:
 			print str(configcount) + " Stationary."
+			statcount += 1
+
+		# user is waiting to perform gesture
+
+		if statcount == 5:
+			statcount = 0
+			if performGesture(gestureID) == True:
+				gestureID += 1
+			if performGesture(gestureID) == False:
+				performGesture(gestureID)
 
 		# otherwise, print accel values
 
