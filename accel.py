@@ -15,7 +15,7 @@ def heardEnter():
     return False
 
 def avg(values):
-	return sum(values, 0.0) / len(values)
+        return sum(values, 0.0) / len(values)
 
 
 ser = serial.Serial('/dev/ttyACM0',115200,timeout=1)
@@ -28,12 +28,17 @@ ser.write(startAccessPoint())
 SMOOTH = 5
 STAT_SENS = 3
 
+statcount = 0
 configcount = -100
 counter = 0
 stat = []
 xlog = []
 ylog = []
 zlog = []
+capturing = False
+gestureID = 0
+gestureData = []
+gesture = {gestureID: gestureData}
 
 
 while 1:
@@ -42,65 +47,82 @@ while 1:
     accel = ser.read(7)
 
     if ord(accel[0]) != 0 and ord(accel[1]) != 0 and ord(accel[2]) != 0:
-	x = ord(accel[0])
-	y = ord(accel[1])
-	z = ord(accel[2])
+        x = ord(accel[0])
+        y = ord(accel[1])
+        z = ord(accel[2])
 
-	# set 0 as midpoint
+        # set 0 as midpoint
 
-	x -= 128
-	y -= 128
-	z -= 128
+        x -= 128
+        y -= 128
+        z -= 128
 
-	# data smoothing of five values
+        # data smoothing of five values
 
-	xlog.append(x)
-	ylog.append(y)
-	zlog.append(z)
+        xlog.append(x)
+        ylog.append(y)
+        zlog.append(z)
 
-	counter += 1
-	configcount += 1
+        counter += 1
+        configcount += 1
 
-	# delay printing of values until config is done
+        # delay printing of values until config is done
 
-	if configcount < 0:
-		counter = 0
-	
-	# config figures out stationary position
+        if configcount < 0:
+                counter = 0
+        
+        # config figures out stationary position
 
-	if configcount == 0:
-		counter = 0
-		stat.extend([round(avg(xlog)),round(avg(ylog)),round(avg(zlog))])
-		print str(configcount) + " Stationary values: " + str(stat)
-		
+        if configcount == 0:
+                counter = 0
+                stat.extend([round(avg(xlog)),round(avg(ylog)),round(avg(zlog))])
+                print str(configcount) + " Stationary values: " + str(stat)
+                
 
-	# print smoothed values
+        # print smoothed values
 
-	if counter == SMOOTH:
-		counter = 0
-		px = round(avg(xlog)) - stat[0]
-		py = round(avg(ylog)) - stat[1] 
-		pz = round(avg(zlog)) - stat[2] 
+        if counter == SMOOTH:
+            counter = 0
+            px = round(avg(xlog)) - stat[0]
+            py = round(avg(ylog)) - stat[1] 
+            pz = round(avg(zlog)) - stat[2] 
 
-		# if not much change, probably stationary
+            # if not much change, probably stationary
 
-		if (abs(px) or abs(py) or abs(pz)) < STAT_SENS:
-			print str(configcount) + " Stationary."
+            if (abs(px) or abs(py) or abs(pz)) < STAT_SENS:
+               print str(configcount) + " Stationary."
+               statcount += 1
 
-		# otherwise, print accel values
+            # otherwise, print accel values
 
-		else:
+            else:
+                print str(configcount) + " " + str([px,py,pz])
 
-			print str(configcount) + " " + str([px,py,pz])
+        # if has been stationary for a while, begin gesture capture
 
+            if statcount == 10 and capturing == False:
+                statcount = 0
+                print "Beginning Gesture Capture!"
+                capturing = True
 
-		del xlog[:]
-		del ylog[:]
-		del zlog[:]
+            if statcount == 10 and capturing == True:
+                statcount = 0
+                print "Ending Gesture Capture!"
+                print gesture
+                capturing = False
+                gestureID += 1
+
+            if capturing == True:
+                for gestureID in gesture:
+                    gestureData.append([px,py,pz])
+                
+        del xlog[:]
+        del ylog[:]
+        del zlog[:]
 
     if heardEnter():
-	print "Thanks for playing!"
-	ser.close()
-	sys.exit(0)
+        print "Thanks for playing!"
+        ser.close()
+        sys.exit(0)
 
 ser.close()
