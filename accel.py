@@ -1,4 +1,5 @@
 import serial, array, select, sys, math
+from pprint import pprint
 
 def startAccessPoint():
     return array.array('B', [0xFF, 0x07, 0x03]).tostring()
@@ -113,8 +114,7 @@ while 1:
                 gestureID += 1
 
             if capturing == True:
-                for gestureID in gesture:
-                    gestureData.append([px,py,pz])
+                gesture.append({gestureID,[px,py,pz]})
                 
         del xlog[:]
         del ylog[:]
@@ -122,6 +122,11 @@ while 1:
 
     if heardEnter():
         print "Thanks for playing!"
+        f = open('gesture_log.txt', 'w')
+        pprint(gesture)
+
+
+
         ser.close()
         sys.exit(0)
 
