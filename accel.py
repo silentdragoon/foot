@@ -1,5 +1,5 @@
-import serial, array, select, sys, math
-from pprint import pprint
+import serial, array, select, sys, math, sqlite3, curses
+from datetime import datetime
 
 def startAccessPoint():
     return array.array('B', [0xFF, 0x07, 0x03]).tostring()
@@ -7,127 +7,146 @@ def startAccessPoint():
 def accDataRequest():
     return array.array('B', [0xFF, 0x08, 0x07, 0x00, 0x00, 0x00, 0x00]).tostring()
 
-def heardEnter():
-    i,o,e = select.select([sys.stdin],[],[],0.0001)
-    for s in i:
-        if s == sys.stdin:
-            input = sys.stdin.readline()
-            return True
-    return False
-
 def avg(values):
         return sum(values, 0.0) / len(values)
 
+def startDB():
+    conn = sqlite3.connect('/home/will/foot/data.db')
+    c = conn.cursor()
+    c.execute('''create table if not exists acceldata (sessionID text, gestureID integer, xdata real, ydata real, zdata real)''')
+    conn.commit()
+    c.close()
+    return conn
 
-ser = serial.Serial('/dev/ttyACM0',115200,timeout=1)
+def main(screen):
 
-# start access point
-ser.write(startAccessPoint())
+    def cprint(message,x,y):
+        if y == 5 and x == 15:
+            screen.addstr(5,5,"STATUS:                                 ")
+        screen.addstr(y,x,message)
+        screen.refresh()
 
-# initialise counters and such
+    rightnow = datetime.now()
 
-SMOOTH = 5
-STAT_SENS = 3
+    ser = serial.Serial('/dev/ttyACM0',115200,timeout=1)
 
-statcount = 0
-configcount = -100
-counter = 0
-stat = []
-xlog = []
-ylog = []
-zlog = []
-capturing = False
-gestureID = 0
-gestureData = []
-gesture = {gestureID: gestureData}
+    # start access point
+    ser.write(startAccessPoint())
 
+    # initialise counters and such
 
-while 1:
-    # send request for acceleration data
-    ser.write(accDataRequest())
-    accel = ser.read(7)
+    SMOOTH = 5
+    STAT_SENS = 3
 
-    if ord(accel[0]) != 0 and ord(accel[1]) != 0 and ord(accel[2]) != 0:
-        x = ord(accel[0])
-        y = ord(accel[1])
-        z = ord(accel[2])
+    statcount = 0
+    configcount = -100
+    counter = 0
+    stat = []
+    xlog = []
+    ylog = []
+    zlog = []
+    capturing = False
+    gestureID = 0
 
-        # set 0 as midpoint
+    screen.nodelay(1)
 
-        x -= 128
-        y -= 128
-        z -= 128
+    cprint("Welcome to the gesture capture app.",5,0)
+    cprint(("SessionID:" + str(rightnow)),5,1)
+    cprint("Keys: Q - Quit | B - Begin Capture | S - Stop Capture",5,3)
 
-        # data smoothing of five values
+    cprint("Waiting for accelerometer data.", 15,5)
 
-        xlog.append(x)
-        ylog.append(y)
-        zlog.append(z)
+    # set up sqlite3 database
+    conn = startDB()
 
-        counter += 1
-        configcount += 1
+    while 1:
 
-        # delay printing of values until config is done
+        c = screen.getch()
+        # send request for acceleration data
+        ser.write(accDataRequest())
+        accel = ser.read(7)
 
-        if configcount < 0:
+        if ord(accel[0]) != 0 and ord(accel[1]) != 0 and ord(accel[2]) != 0:
+            x = ord(accel[0])
+            y = ord(accel[1])
+            z = ord(accel[2])
+
+            # set 0 as midpoint
+
+            x -= 128
+            y -= 128
+            z -= 128
+
+            # data smoothing of five values
+
+            xlog.append(x)
+            ylog.append(y)
+            zlog.append(z)
+
+            counter += 1
+            configcount += 1
+
+            # delay printing of values until config is done
+
+            if configcount == -95:
+                cprint("Configuring stationary position",15,5)
+
+            if configcount < 0:
+                cprint(str(100 - (abs(configcount))) + "%",50,5)
                 counter = 0
-        
-        # config figures out stationary position
+            
+            # config figures out stationary position
 
-        if configcount == 0:
+            if configcount == 0:
                 counter = 0
                 stat.extend([round(avg(xlog)),round(avg(ylog)),round(avg(zlog))])
-                print str(configcount) + " Stationary values: " + str(stat)
-                
+                cprint("Stationary values: " + str(stat),15,6)
+                    
 
-        # print smoothed values
+            # print smoothed values
 
-        if counter == SMOOTH:
-            counter = 0
-            px = round(avg(xlog)) - stat[0]
-            py = round(avg(ylog)) - stat[1] 
-            pz = round(avg(zlog)) - stat[2] 
-
-            # if not much change, probably stationary
-
-            if (abs(px) or abs(py) or abs(pz)) < STAT_SENS:
-               print str(configcount) + " Stationary."
-               statcount += 1
-
-            # otherwise, print accel values
-
-            else:
-                print str(configcount) + " " + str([px,py,pz])
-
-        # if has been stationary for a while, begin gesture capture
-
-            if statcount == 10 and capturing == False:
-                statcount = 0
-                print "Beginning Gesture Capture!"
-                capturing = True
-
-            if statcount == 10 and capturing == True:
-                statcount = 0
-                print "Ending Gesture Capture!"
-                print gesture
-                capturing = False
-                gestureID += 1
-
-            if capturing == True:
-                gesture.append({gestureID,[px,py,pz]})
-                
-        del xlog[:]
-        del ylog[:]
-        del zlog[:]
-
-    if heardEnter():
-        print "Thanks for playing!"
-        f = open('gesture_log.txt', 'w')
-        pprint(gesture)
+            if counter == SMOOTH:
+                counter = 0
+                px = round(avg(xlog)) - stat[0]
+                py = round(avg(ylog)) - stat[1] 
+                pz = round(avg(zlog)) - stat[2] 
 
 
+                cprint("Current values: " + str([px,py,pz]),15,7)
 
-        ser.close()
-        sys.exit(0)
+                # if not much change, probably stationary
 
-ser.close()
+                if (abs(px) or abs(py) or abs(pz)) < STAT_SENS:
+                   statcount += 1
+
+                # if has been stationary for a while, begin gesture capture
+
+                if statcount == 10 and capturing == False:
+                    statcount = 0
+                    cprint("Capturing gesture.                                         ",15,5)
+                    capturing = True
+
+                if statcount == 10 and capturing == True:
+                    statcount = 0
+                    cprint("Idling.                                                    ",15,5)
+                    capturing = False
+                    gestureID += 1
+
+                # store captured data to sqlite database that's previously been set up
+
+                if capturing == True:
+                    c = conn.cursor()
+                    c.execute('''insert into acceldata values (?,?,?,?,?)''',[rightnow,gestureID,px,py,pz])
+                    conn.commit()
+                    c.close()
+                    
+            del xlog[:]
+            del ylog[:]
+            del zlog[:]
+
+        if c == ord('q'):
+            ser.close()
+            sys.exit(0)
+
+if __name__ == "__main__":
+    curses.wrapper(main)
