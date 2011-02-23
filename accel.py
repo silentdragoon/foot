@@ -42,7 +42,7 @@ def main(screen):
 
     # initialise counters and such
 
-    SMOOTH = 5
+    SMOOTH = 2
     STAT_SENS = 3
 
     configcount = -100
