@@ -25,7 +25,6 @@ def is_number(s):
     except ValueError:
         return False
 
-
 def main(screen):
 
     def cprint(message,x,y):
@@ -115,6 +114,7 @@ def main(screen):
 
             # smoothing takes place
 
+
             if counter == SMOOTH:
                 counter = 0
                 px = round(avg(xlog)) - stat[0]
@@ -162,6 +162,7 @@ def main(screen):
         if ccc == ord('s') and capturing == True:
             gestureID += 1
             capturing = False
+            cprint("Idling. Next gesture captured will be " + str(gestureID) + "                                     ",15,5)
     
         if ccc == ord('q'):
             ser.close()
