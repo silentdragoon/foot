@@ -1,8 +1,43 @@
 from Protractor3D import *
 
+class Recognizer:
+
+    templates = []
+ 
+    def recognize(self, points):
+
+        p = Protractor3D()
+
+        currentTest = p.generate_template(points)
+        bestDistance = float("infinity")
+        bestTemplate = None
+        for template in self.templates:
+            distance = p.protractor3D_classify(currentTest,template.points)[2]
+            if distance < bestDistance:
+                bestDistance = distance
+                bestTemplate = template
+
+        score = 1.0 - (bestDistance / (0.5 * math.sqrt(250.0 * 250.0 + 250.0 * 250.0)))
+
+        return bestTemplate.name, score
+
+    def addTemplate(self,name,points):
+        self.templates.append(Template(name,points))
+        return len([t for t in self.templates if t.name == name])
+
+    def deleteTemplates(self,name):
+        self.templates = [t for t in self.templates if t.name != name]
+        return len(self.templates)
+
+class Template:
+    def __init__(self,name,points):
+        self.name = name
+        self.points = Protractor3D().generate_template(points)
+
+
 def main():
 
-    p = Protractor3D()
+    r = Recognizer()
 
     # hard coded templates
 
@@ -28,10 +63,8 @@ def main():
 
     # add these to a dict of templates
 
-    templates = {}
-    templates["tap foot"] = p.generate_template(sampleStomp)
-    templates["flick left"] = p.generate_template(sampleFlickLeft)    
-
+    r.addTemplate("tap foot", sampleStomp)
+    r.addTemplate("flick left", sampleFlickLeft)
 
     # hard coded test data
 
@@ -55,19 +88,11 @@ def main():
                         [0, 0,      1,      0]]
 
     # generate template for current test
-
-    currentTest = p.generate_template(testFlickLeft)
-
     # go through dict of templates
     # doing classification of current test against each item
 
-    result1 = p.protractor3D_classify(currentTest,templates["tap foot"])
-    result2 = p.protractor3D_classify(currentTest,templates["flick left"])
-
-    if result1[2] < result2[2]:
-        print "gesture is tap foot"
-    else:
-        print "gesture is flick left"
+    print r.recognize(testStomp)
+    print r.recognize(testFlickLeft)
 
 
 if __name__ == "__main__":
