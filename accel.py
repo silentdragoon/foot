@@ -20,7 +20,7 @@ def startDB():
 
 def is_number(s):
     try:
-        float(s)
+        int(s)
         return True
     except ValueError:
         return False
@@ -42,7 +42,7 @@ def main(screen):
 
     # initialise counters and such
 
-    SMOOTH = 5
+    SMOOTH = 2
     STAT_SENS = 3
 
     configcount = -100
@@ -59,8 +59,8 @@ def main(screen):
     cprint("Welcome to the gesture capture app.",5,0)
     cprint("SessionID: " + str(rightnow),5,1)
     cprint("Smoothing: " + str(SMOOTH) + " | Configuration time: " + str(abs(configcount)),5,2)
-    cprint("Keys: C - Reconfigure Stationary Position | G - Set Next GestureID",5,10)
-    cprint("      B - Begin Capture | S - Stop Capture | Q - Quit",5,11)
+    cprint("Keys: C - Reconfigure Stationary Position | G - Set Next GestureID",5,11)
+    cprint("      B - Begin Capture | S - Stop Capture | Q - Quit",5,12)
 
     cprint("Waiting for accelerometer data.", 15,5)
 
@@ -97,10 +97,10 @@ def main(screen):
             # delay printing of values until config is done
 
             if configcount == -95:
-                cprint("Configuring stationary position",15,5)
+                cprint("Configuring stationary position    ",15,5)
 
             if configcount < 0:
-                cprint(str(100 - (abs(configcount))) + "%",50,5)
+                cprint(str(100 - (abs(configcount))) + "%    ",50,5)
                 counter = 0
             
             # config figures out stationary position
@@ -149,8 +149,8 @@ def main(screen):
             screen.nodelay(1)
             cprint("                                                       ",5,9)
             if is_number(nextGesture):
-                gestureID = nextGesture
-                cprint("Idling. Next gesture captured will be " + str(gestureID) + "                                     ",15,5)
+		gestureID = int(nextGesture)
+        	cprint("Idling. Next gesture captured will be " + str(gestureID) + "                                     ",15,5)
 
         if ccc == ord('c') and capturing == False:
             configcount = -100
