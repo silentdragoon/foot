@@ -11,9 +11,11 @@ def avg(values):
         return sum(values, 0.0) / len(values)
 
 def startDB():
-    conn = sqlite3.connect('/home/will/foot/data.db')
+    conn = sqlite3.connect('/home/will/foot/testData.db')
     c = conn.cursor()
     c.execute('''create table if not exists acceldata (sessionID text, gestureID integer, xdata real, ydata real, zdata real)''')
+    conn.commit()
+    c.execute('''create table if not exists capData (gestureID integer, cap test)''')
     conn.commit()
     c.close()
     return conn
@@ -26,6 +28,8 @@ def is_number(s):
         return False
 
 def main(screen):
+
+    capData = []
 
     def cprint(message,x,y):
         if y == 5 and x == 15:
@@ -128,6 +132,10 @@ def main(screen):
                     c.execute('''insert into acceldata values (?,?,?,?,?)''',[rightnow,gestureID,px,py,pz])
                     conn.commit()
                     c.close()
+                    
+                    # capture data for recognition later
+                    
+                    capData.append([0,px,py,pz])
 
                 # print smoothed values
 
@@ -163,6 +171,13 @@ def main(screen):
             gestureID += 1
             capturing = False
             cprint("Idling. Next gesture captured will be " + str(gestureID) + "                                     ",15,5)
+            
+            c = conn.cursor()
+            c.execute('''insert into capData values (?,?)''',[(gestureID-1),str(capData)])
+            conn.commit()
+            c.close()
+           
+            capData = []
     
         if ccc == ord('q'):
             ser.close()
