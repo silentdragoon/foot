@@ -18,9 +18,10 @@ class Recognizer:
                 bestTemplate = template
 
         score = 1.0 - (bestDistance / (0.5 * math.sqrt(250.0 * 250.0 + 250.0 * 250.0)))
-        if (score > 1) or (score < 0):
+        '''if (score > 1) or (score < 0):
             bestTemplate.name = "None, MSE2:"
             score = bestDistance;
+            '''
 
         return bestTemplate.name, score
 
