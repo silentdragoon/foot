@@ -46,9 +46,6 @@ def main(screen):
 
     # initialise counters and such
 
-    SMOOTH = 1
-    STAT_SENS = 3
-
     configcount = -100
     counter = 0
     stat = []
@@ -62,7 +59,6 @@ def main(screen):
 
     cprint("Welcome to the gesture capture app.",5,0)
     cprint("SessionID: " + str(rightnow),5,1)
-    cprint("Smoothing: " + str(SMOOTH) + " | Configuration time: " + str(abs(configcount)),5,2)
     cprint("Keys: C - Reconfigure Stationary Position | G - Set Next GestureID",5,11)
     cprint("      B - Begin Capture | S - Stop Capture | Q - Quit",5,12)
 
@@ -84,74 +80,31 @@ def main(screen):
             z = ord(accel[2])
 
             # set 0 as midpoint
-            '''z
+            
             x -= 128
             y -= 128
             z -= 128
-            '''
-            # data smoothing of five values
-
-            xlog.append(x)
-            ylog.append(y)
-            zlog.append(z)
-
-            counter += 1
-            configcount += 1
-
-            # delay printing of values until config is done
-
-            if configcount == -95:
-                cprint("Configuring stationary position    ",15,5)
-
-            if configcount < 0:
-                cprint(str(100 - (abs(configcount))) + "%    ",50,5)
-                counter = 0
             
-            # config figures out stationary position
-
-            if configcount == 0:
-                counter = 0
-                del stat[:]
-                stat.extend([round(avg(xlog)),round(avg(ylog)),round(avg(zlog))])
-                cprint("Stationary values: " + str(stat),15,6)
-                cprint("Idling. Next gesture captured will be " + str(gestureID) + "                                     ",15,5)
-
-            # smoothing takes place
-
-
-            if counter == SMOOTH:
-                counter = 0
-                '''
-                px = round(avg(xlog)) - stat[0]
-                py = round(avg(ylog)) - stat[1] 
-                pz = round(avg(zlog)) - stat[2] 
-                '''
-                
-                px = round(avg(xlog))
-                py = round(avg(ylog))
-                pz = round(avg(zlog))
+            cprint("Next gesture captured will be " + str(gestureID) + "                                     ",15,5)
 
                 # store captured data to sqlite database that's previously been set up
 
-                if capturing == True:
-                    c = conn.cursor()
-                    c.execute('''insert into acceldata values (?,?,?,?,?)''',[rightnow,gestureID,px,py,pz])
-                    conn.commit()
-                    c.close()
-                    
-                    # capture data for recognition later
-                    
-                    capData.append([0,px,py,pz])
+            if capturing == True:
+                c = conn.cursor()
+                c.execute('''insert into acceldata values (?,?,?,?,?)''',[rightnow,gestureID,x,y,z])
+                conn.commit()
+                c.close()
+                
+                # capture data for recognition later
+                
+                capData.append([0,x,y,z])
 
-                # print smoothed values
+            # print smoothed values
 
-                cprint("                                            ",15,7)
-                cprint("Current values:    " + str([px,py,pz]),15,7)
+            cprint("                                            ",15,7)
+            cprint("Current values:    " + str([x,y,z]),15,7)
 
                    
-            del xlog[:]
-            del ylog[:]
-            del zlog[:]
 
         if ccc == ord('g') and capturing == False:
             screen.nodelay(0)
