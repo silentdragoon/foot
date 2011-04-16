@@ -338,12 +338,12 @@ class Protractor3D:
                 # mse between gesture and template
                 
                 mse1 = mse(g, t) 
-                print "Theta:", theta*180/ math.pi,
-                print "Error:  gesture <> template:", mse1,
+                # print "Theta:", theta*180/ math.pi,
+                # print "Error:  gesture <> template:", mse1,
                 
                 
                 mse2 = mse(g, back_rotated_points)
-                print "rotated gesture <> template:", mse2
+                # print "rotated gesture <> template:", mse2
                 if DEBUG > 1:
                         try:
                                 mse3 = mse(t, back_rotated_points)
