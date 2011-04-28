@@ -43,12 +43,18 @@ def main(screen):
     BrowserList = "Double tap toe forward", "Double tap left front", "Double tap left right"
     WholeList = ("Double tap", "Shake", "Clockwise Circle", "Counterclockwise Circle", "Swing Left", "Swing Right",
                 "Swing Forward", "Swing Backward", "Arc Left", "Arc Right")
+    ShortList = "Double tap", "Shake"
 
-    gestureList = PhoneList
+    gestureList = ShortList
     gestureName = gestureList[0]
     traces = 5
     traceID = 0
     classifying = False
+    testing = False
+
+    score = 0.0
+    total = 0.0
+    badClass = []
 
     blank = [[0,0,0,0],[0,5,5,5],[0,0,0,0]]
     r.addTemplate("blank",blank)
@@ -72,7 +78,7 @@ def main(screen):
     cprint("Keys: G - Set Next GestureID | N - Set next GestureName | C - Toggle Classify Mode",5,11)
     cprint("      B - Begin Capture | S - Stop Capture | Q - Quit",5,12)
     cprint("Waiting for accelerometer data.", 15,5)
-    cprint("Classify Mode: " + str(classifying),5,2)
+    cprint("Classify Mode: " + str(classifying) + " Testing mode: " + str(testing),5,2)
 
     # set up sqlite3 database
     conn = startDB()
@@ -117,7 +123,6 @@ def main(screen):
 
             cprint("Current values:    " + str([x,y,z]),15,7)
 
-
         if ccc == ord('g') and capturing == False and classifying == False:
             screen.nodelay(0)
             curses.echo()
@@ -145,13 +150,25 @@ def main(screen):
 
         if ccc == ord('c') and capturing == False and classifying == False:
             classifying = True
-            cprint("Classify Mode: " + str(classifying),5,2)
+            cprint("Classify Mode: " + str(classifying) + " Testing mode: " + str(testing),5,2)
 
-        if ccc == ord('c') and capturing == False and classifying == True:
+        elif ccc == ord('c') and capturing == False and classifying == True:
             classifying = False
-            cprint("Classify Mode: " + str(classifying),5,2)
+            cprint("Classify Mode: " + str(classifying) + " Testing mode: " + str(testing),5,2)
 
-        if ccc == ord('b') and capturing == False:
+        if ccc == ord('t') and capturing == False and testing == True:
+            testing = False
+            cprint("Classify Mode: " + str(classifying) + " Testing mode: " + str(testing),5,2)
+
+        elif ccc == ord('t') and capturing == False and testing == False:
+            testing = True
+            classifying = False
+            gestureID = 0
+            traceID = 0
+            gestureName = gestureList[gestureID]
+            cprint("Classify Mode: " + str(classifying) + " Testing mode: " + str(testing),5,2)
+
+        if ccc == ord('b') and capturing == False and classifying == False:
             capturing = True
 
         if ccc == ord('s') and capturing == True and classifying == False:
@@ -165,16 +182,27 @@ def main(screen):
             c.close()
 
             # do classification
-            cprint("Classification Result: " + str(r.recognize(capData)),15,9)
+            cresult = r.recognize(capData)
+            cprint("Classification Result: " + str(cresult),15,9)
 
             # add as a trace
-            r.addTemplate(gestureName,capData)
+            if testing == False:
+                r.addTemplate(gestureName,capData)
 
             capData = []
 
-        if ccc == ord('s') and capturing == True and classifying == True:
-            capturing = False
-            cprint("Classification Result: " + str(r.recognize(capData)),15,9)
+            if testing == True:
+                if  gestureName in cresult:
+                    score += 1.0
+                else:
+                    badClass.append("gID: " + str(gestureID) + " tID: " + str(traceID) +  " gName: " + gestureName)
+                total += 1.0
+                cprint(str(score) + "/" + str(total) + ", " + str(score/total*100) + "% accuracy",15,11)
+                cprint("Bad Classifications: " + str(badClass),15,15)
+
+        elif ccc == ord('s') and capturing == True and classifying == True:
+            cresult = r.recognize(capData)
+            cprint("Classification Result: " + str(cresult),15,9)
             capData = []
 
         # check to see if we're done with this gesture yet
@@ -189,7 +217,7 @@ def main(screen):
             else:
                 gestureName = gestureList[gestureID]
 
-        if ccc == ord('q'):
+        elif ccc == ord('q'):
             ser.close()
             sys.exit(0)
 
