@@ -165,6 +165,9 @@ def main(screen):
             classifying = False
             gestureID = 0
             traceID = 0
+            score = 0
+            total = 0
+            badClass = []
             gestureName = gestureList[gestureID]
             cprint("Classify Mode: " + str(classifying) + " Testing mode: " + str(testing),5,2)
 
