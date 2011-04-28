@@ -165,13 +165,16 @@ def main(screen):
             classifying = False
             gestureID = 0
             traceID = 0
+            score = 0
+            total = 0
+            badClass = []
             gestureName = gestureList[gestureID]
             cprint("Classify Mode: " + str(classifying) + " Testing mode: " + str(testing),5,2)
 
-        if ccc == ord('b') and capturing == False and classifying == False:
+        if ccc == ord('b') and capturing == False:
             capturing = True
 
-        if ccc == ord('s') and capturing == True and classifying == False:
+        if ccc == ord('s') and capturing == True:
             traceID += 1
             capturing = False
             cprint("Idling. Next gesture captured will be " + str(gestureID),15,5)
@@ -186,7 +189,7 @@ def main(screen):
             cprint("Classification Result: " + str(cresult),15,9)
 
             # add as a trace
-            if testing == False:
+            if testing == False and classifying == False:
                 r.addTemplate(gestureName,capData)
 
             capData = []
