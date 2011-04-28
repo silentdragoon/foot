@@ -66,7 +66,7 @@ def main(screen):
 
     rightnow = datetime.now()
 
-    ser = serial.Serial(3,115200,timeout=1)
+    ser = serial.Serial(2,115200,timeout=1)
 
     # start access point
     ser.write(startAccessPoint())
