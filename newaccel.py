@@ -45,7 +45,7 @@ def main(screen):
                 "Swing Forward", "Swing Backward", "Arc Left", "Arc Right")
     ShortList = "Double tap", "Shake"
 
-    gestureList = ShortList
+    gestureList = MediaList
     gestureName = gestureList[0]
     traces = 5
     traceID = 0
