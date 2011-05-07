@@ -7,22 +7,28 @@ class Recognizer:
     def recognize(self, points):
 
         p = Protractor3D()
+        topMatches = []
 
         currentTest = p.generate_template(points)
-        bestDistance = float("infinity")
-        bestTemplate = None
+        '''bestDistance = float("infinity")
+        bestTemplate = None'''
         for template in self.templates:
             distance = p.protractor3D_classify(currentTest,template.points)[2]
-            if distance < bestDistance:
+            topMatches.append([int(distance),template.name])
+            topMatches.sort()
+            if len(topMatches) > 5:
+                topMatches.pop()
+            
+            '''if distance < bestDistance:
                 bestDistance = distance
-                bestTemplate = template
+                bestTemplate = template'''
 
         '''score = 1.0 - (bestDistance / (0.5 * math.sqrt(250.0 * 250.0 + 250.0 * 250.0)))
         if (score > 1) or (score < 0):
             bestTemplate.name = "None, MSE2:"
             score = bestDistance;
             '''
-        return bestTemplate.name, distance
+        return topMatches
 
     def addTemplate(self,name,points):
         self.templates.append(Template(name,points))
@@ -41,7 +47,7 @@ class Template:
 def main():
 
     r = Recognizer()
-
+    '''
     # hard coded templates
 
     sampleStomp =  [[0, 0,       0,    0],
@@ -133,7 +139,7 @@ def main():
 
     print r.recognize(tr5)
     print r.recognize(tr6)
-    print r.recognize(tr7)
+    print r.recognize(tr7)'''
 
 
 if __name__ == "__main__":

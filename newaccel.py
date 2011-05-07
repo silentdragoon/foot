@@ -186,7 +186,13 @@ def main(screen):
 
             # do classification
             cresult = r.recognize(capData)
-            cprint("Classification Result: " + str(cresult),15,9)
+            cprint("Classification Result: " + str(cresult),15,15)
+            bestCount = 0
+            for item in cresult:
+                if sum(1 for itemm in cresult if itemm[1] == item[1]) > bestCount:
+                    bestResult = item[1]
+                    bestCount = sum(1 for itemm in cresult if itemm[1] == item[1])
+            cprint("Final answer: " + str(bestResult) + " " + str(bestCount/5.0*100) + "% strength",15,20)
 
             # add as a trace
             if testing == False and classifying == False:
@@ -205,7 +211,7 @@ def main(screen):
 
         elif ccc == ord('s') and capturing == True and classifying == True:
             cresult = r.recognize(capData)
-            cprint("Classification Result: " + str(cresult),15,9)
+            cprint("Classification Result: " + str(cresult),20,9)
             capData = []
 
         # check to see if we're done with this gesture yet
