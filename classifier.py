@@ -13,12 +13,15 @@ class Recognizer:
         '''bestDistance = float("infinity")
         bestTemplate = None'''
         for template in self.templates:
-            distance = p.protractor3D_classify(currentTest,template.points)[2]
-            topMatches.append([int(distance),template.name])
-            topMatches.sort()
-            if len(topMatches) > 5:
-                topMatches.pop()
-            
+            distance = p.protractor3D_classify(currentTest,template.points)
+            rotation = int(abs(distance[0]))
+            '''print "Rotation " + str(rotation);'''
+            if rotation < 30:
+                # it's likely to be our gesture! 
+                topMatches.append([int(distance[2]),template.name,rotation])
+                topMatches.sort()
+                if len(topMatches) > 5:
+                    topMatches.pop()
             '''if distance < bestDistance:
                 bestDistance = distance
                 bestTemplate = template'''
@@ -47,7 +50,7 @@ class Template:
 def main():
 
     r = Recognizer()
-    '''
+    
     # hard coded templates
 
     sampleStomp =  [[0, 0,       0,    0],
@@ -117,29 +120,28 @@ def main():
 
     
     # add these to a dict of templates
-
+    '''
     r.addTemplate("tap foot", sampleStomp)
     r.addTemplate("flick left", sampleFlickLeft)
     r.addTemplate("flick right", sampleFlickRight)
     r.addTemplate("double tap", sampleDoubleTap)
     r.addTemplate("shake", sampleShake)
-    
+    '''
     r.addTemplate("fl", tr1)
     r.addTemplate("fr", tr2)
     r.addTemplate("fl2", tr3)
     r.addTemplate("fr2", tr4)
 
     # perform recognition on each test item    
-
-    print r.recognize(testStomp)
+    '''
     print r.recognize(testFlickLeft)
     print r.recognize(testFlickRight)
     print r.recognize(testDoubleTap)
     print r.recognize(testShake)
-
-    print r.recognize(tr5)
-    print r.recognize(tr6)
-    print r.recognize(tr7)'''
+    '''
+    print "should be fl" + str(r.recognize(tr5))
+    print "should be fr" + str(r.recognize(tr6))
+    print "should be fl" + str(r.recognize(tr7))
 
 
 if __name__ == "__main__":

@@ -350,8 +350,8 @@ class Protractor3D:
                                 print "template <> rotated points:", mse3,
                         except:
                                 traceback.print_exc()
-                #sp1 = scalar(g,t)
-                #sp2 = scalar(t, back_rotated_points)
+                sp1 = scalar(g,t)
+                sp2 = scalar(t, back_rotated_points)
                 #print "scalar g <> t",sp1, "scalar g <> r(t)", sp2
                 return theta*180/ math.pi,mse2,mse1,0,0
                 # TODO plot stuff!!!!!

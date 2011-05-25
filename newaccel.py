@@ -40,12 +40,15 @@ def main(screen):
     PhoneList = "Double tap", "Shake", "Clockwise Circle", "Counterclockwise Circle", "Swing Left", "Swing Right"
     MediaList = "Double tap", "Swing Right", "Swing Left", "Shake", "Swing Forward", "Swing Backward"
     MapList = "Swing Left", "Swing Right", "Swing Forward", "Swing Backward", "Arc Left", "Arc Right"
-    BrowserList = "Double tap toe forward", "Double tap left front", "Double tap left right"
+    BrowserList = "Double tap toe forward", "Double tap left front", "Double tap right front"
     WholeList = ("Double tap", "Shake", "Clockwise Circle", "Counterclockwise Circle", "Swing Left", "Swing Right",
-                "Swing Forward", "Swing Backward", "Arc Left", "Arc Right")
+                "Swing Forward", "Swing Backward", "Arc Left", "Arc Right", "Double tap toe forward",
+                "Double tap left front", "Double tap right front")
     ShortList = "Double tap", "Shake"
+    CustomList = "Double tap", "Swing Left", "Swing Right", "Swing Forward", "Swing Back"
+    ShorterList = "Swing Forward", "Swing Back", "Swing Left"
 
-    gestureList = MediaList
+    gestureList = ShorterList
     gestureName = gestureList[0]
     traces = 5
     traceID = 0
@@ -60,7 +63,7 @@ def main(screen):
     r.addTemplate("blank",blank)
 
     def cprint(message,x,y):
-        screen.addstr(y,0," "*100)
+        screen.addstr(y,0," "*79)
         screen.addstr(y,x,message)
         screen.refresh()
 
@@ -186,13 +189,20 @@ def main(screen):
 
             # do classification
             cresult = r.recognize(capData)
-            cprint("Classification Result: " + str(cresult),15,15)
-            bestCount = 0
-            for item in cresult:
-                if sum(1 for itemm in cresult if itemm[1] == item[1]) > bestCount:
-                    bestResult = item[1]
-                    bestCount = sum(1 for itemm in cresult if itemm[1] == item[1])
-            cprint("Final answer: " + str(bestResult) + " " + str(bestCount/5.0*100) + "% strength",15,20)
+
+            if len(cresult) != 0:
+                screen.addstr(15,0," "*100)
+                screen.addstr(16,0," "*100)
+                screen.addstr(17,0," "*100)
+                screen.addstr(18,0," "*100)
+                cprint("Classification Result: " + str(cresult),15,15)
+                bestCount = 0
+                for item in cresult:
+                    if sum(1 for itemm in cresult if itemm[1] == item[1]) > bestCount:
+                        bestResult = item[1]
+                        bestCount = sum(1 for itemm in cresult if itemm[1] == item[1])
+                        bestRotation = item[2]
+                cprint("Final answer: " + str(bestResult) + " " + str(bestCount/5.0*100) + "% strength, rotation: " + str(bestRotation),15,20)
 
             # add as a trace
             if testing == False and classifying == False:
@@ -201,13 +211,13 @@ def main(screen):
             capData = []
 
             if testing == True:
-                if  gestureName in cresult:
+                if  gestureName in bestResult:
                     score += 1.0
                 else:
                     badClass.append("gID: " + str(gestureID) + " tID: " + str(traceID) +  " gName: " + gestureName)
                 total += 1.0
                 cprint(str(score) + "/" + str(total) + ", " + str(score/total*100) + "% accuracy",15,11)
-                cprint("Bad Classifications: " + str(badClass),15,15)
+                cprint("Bad Classifications: " + str(badClass),5,20)
 
         elif ccc == ord('s') and capturing == True and classifying == True:
             cresult = r.recognize(capData)
