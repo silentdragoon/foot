@@ -48,7 +48,7 @@ def main(screen):
     CustomList = "Double tap", "Swing Left", "Swing Right", "Swing Forward", "Swing Back"
     ShorterList = "Swing Forward", "Swing Back", "Swing Left"
 
-    gestureList = MapList
+    gestureList = BrowserList
     gestureName = gestureList[0]
     traces = 5
     traceID = 0
@@ -202,7 +202,9 @@ def main(screen):
                         bestResult = item[1]
                         bestCount = sum(1 for itemm in cresult if itemm[1] == item[1])
                         bestRotation = item[2]
-                cprint("Final answer: " + str(bestResult) + " " + str(bestCount/5.0*100) + "% strength, rotation: " + str(bestRotation),15,20)
+
+                cprint("Final answer: " + str(bestResult) + " " + str(bestCount) + " result(s)",15,20)
+                
 
             # add as a trace
             if testing == False and classifying == False:
