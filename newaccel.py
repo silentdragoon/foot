@@ -48,7 +48,7 @@ def main(screen):
     CustomList = "Double tap", "Swing Left", "Swing Right", "Swing Forward", "Swing Back"
     ShorterList = "Swing Forward", "Swing Back", "Swing Left"
 
-    gestureList = ShorterList
+    gestureList = MapList
     gestureName = gestureList[0]
     traces = 5
     traceID = 0
@@ -214,7 +214,8 @@ def main(screen):
                 if  gestureName in bestResult:
                     score += 1.0
                 else:
-                    badClass.append("gID: " + str(gestureID) + " tID: " + str(traceID) +  " gName: " + gestureName)
+                    # badClass.append("gID: " + str(gestureID) + " tID: " + str(traceID) +  " gName: " + gestureName)
+                    badClass.append(gestureName)
                 total += 1.0
                 cprint(str(score) + "/" + str(total) + ", " + str(score/total*100) + "% accuracy",15,11)
                 cprint("Bad Classifications: " + str(badClass),5,20)
