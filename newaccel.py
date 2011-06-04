@@ -118,11 +118,11 @@ def main(screen):
     r.addTemplate("F", trainData[7])
     r.addTemplate("F", trainData[8])
     r.addTemplate("F", trainData[9])
-    r.addTemplate("S", trainData[10])
-    r.addTemplate("S", trainData[11])
-    r.addTemplate("S", trainData[12])
-    r.addTemplate("S", trainData[13])
-    r.addTemplate("S", trainData[14])
+    #r.addTemplate("S", trainData[10])
+    #r.addTemplate("S", trainData[11])
+    #r.addTemplate("S", trainData[12])
+    #r.addTemplate("S", trainData[13])
+    #r.addTemplate("S", trainData[14])
 
     while 1:
 
@@ -164,7 +164,7 @@ def main(screen):
 
             cprint("Current values:    " + str([x,y,z]),15,7)
             
-            if realtime == True:
+            '''if realtime == True:
                 buffer.insert(0,[0,int(x[0]),int(y[0]),int(z[0])])
                 if len(buffer) > 80:
                     buffer.pop()
@@ -172,7 +172,7 @@ def main(screen):
                     cprint(str(rr),0,4)
                     if len(rr) != 0:
                         if rr[0][0] < 50 and rr[0][2] < 45 and rr[0][1] != 'S':
-                            cprint("OMG, it's a wild " + str(rr[0][1]),0,3)
+                            cprint("OMG, it's a wild " + str(rr[0][1]),0,3)'''
 
         if ccc == ord('r') and realtime == False:
             realtime = True
