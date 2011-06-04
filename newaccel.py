@@ -171,7 +171,7 @@ def main(screen):
                     rr = r.recognize(buffer)
                     cprint(str(rr),0,4)
                     if len(rr) != 0:
-                        if rr[0][0] < 30 and rr[0][2] < 45 and rr[0][1] != 'S':
+                        if rr[0][0] < 50 and rr[0][2] < 45 and rr[0][1] != 'S':
                             cprint("OMG, it's a wild " + str(rr[0][1]),0,3)
 
         if ccc == ord('r') and realtime == False:
