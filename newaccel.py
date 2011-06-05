@@ -32,7 +32,7 @@ def main(screen):
 
     # initialise counters and such
 
-    nodisplay = True
+    nodisplay = False
     capturing = False
     realtime = False
     gestureID = 0
