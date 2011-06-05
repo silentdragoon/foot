@@ -32,6 +32,7 @@ def main(screen):
 
     # initialise counters and such
 
+    nodisplay = True
     capturing = False
     realtime = False
     gestureID = 0
@@ -66,9 +67,10 @@ def main(screen):
     r.addTemplate("blank",blank)
 
     def cprint(message,x,y):
-        screen.addstr(y,0," "*79)
-        screen.addstr(y,x,message)
-        screen.refresh()
+        if nodisplay == False:
+            screen.addstr(y,0," "*79)
+            screen.addstr(y,x,message)
+            screen.refresh()
         
     rightnow = datetime.now()
 
