@@ -1,1 +1,1 @@
-search --name PDF key Page_Up
+search --name PDF key ctrl+Page_Up
