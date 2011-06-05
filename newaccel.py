@@ -1,4 +1,4 @@
-import serial, array, select, sys, math, sqlite3, curses, struct
+import serial, array, select, sys, math, sqlite3, curses, struct, subprocess
 from datetime import datetime
 from classifier import *
 
@@ -54,7 +54,7 @@ def main(screen):
     gestureName = gestureList[0]
     traces = 5
     traceID = 0
-    classifying = False
+    classifying = True
     testing = False
 
     score = 0.0
@@ -230,10 +230,10 @@ def main(screen):
             gestureName = gestureList[gestureID]
             cprint("Classify Mode: " + str(classifying) + " Testing mode: " + str(testing),5,2)
 
-        if ccc == ord('b') and capturing == False:
+        if ccc == ord('b') or ccc == curses.KEY_NPAGE and capturing == False:
             capturing = True
 
-        if ccc == ord('s') and capturing == True:
+        if ccc == ord('s') or ccc == curses.KEY_PPAGE and capturing == True:
             traceID += 1
             capturing = False
             cprint("Idling. Next gesture captured will be " + str(gestureID),15,5)
@@ -260,7 +260,12 @@ def main(screen):
                         bestRotation = item[2]
 
                 cprint("Final answer: " + str(bestResult) + " " + str(bestCount) + " result(s)",15,20)
-                
+
+                # run pagedown/up on PDF viewer
+                if bestResult == "F":
+                    subprocess.Popen('xdotool ~/foot/next.txt', shell=True)
+                elif bestResult == "B":
+                    subprocess.Popen('xdotool ~/foot/prev.txt', shell=True)
 
             # add as a trace
             if testing == False and classifying == False:
@@ -281,6 +286,7 @@ def main(screen):
         elif ccc == ord('s') and capturing == True and classifying == True:
             cresult = r.recognize(capData)
             cprint("Classification Result: " + str(cresult),20,9)
+
             capData = []
 
         # check to see if we're done with this gesture yet
