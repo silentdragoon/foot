@@ -1,1 +1,1 @@
-search --name PDF key ctrl+Page_Up
+search --name Gesture key ctrl+Page_Up

@@ -32,7 +32,6 @@ def main(screen):
 
     # initialise counters and such
 
-    nodisplay = True
     capturing = False
     realtime = False
     gestureID = 0
@@ -67,10 +66,9 @@ def main(screen):
     r.addTemplate("blank",blank)
 
     def cprint(message,x,y):
-        if nodisplay == False:
-            screen.addstr(y,0," "*79)
-            screen.addstr(y,x,message)
-            screen.refresh()
+        screen.addstr(y,0," "*79)
+        screen.addstr(y,x,message)
+        screen.refresh()
         
     rightnow = datetime.now()
 
@@ -188,6 +186,7 @@ def main(screen):
             screen.nodelay(0)
             curses.echo()
             cprint("Please input next gesture ID to be captured: ",5,9)
+            screen.addstr(9,55, " "*3, curses.A_UNDERLINE)
             nextGesture = screen.getstr(9,55)
             curses.noecho()
             screen.nodelay(1)
@@ -202,6 +201,7 @@ def main(screen):
             screen.nodelay(0)
             curses.echo()
             cprint("Please input next gesture's name: ",5,9)
+            screen.addstr(9,55, " "*10, curses.A_UNDERLINE)
             gestureName = screen.getstr(9,55)
             curses.noecho()
             screen.nodelay(1)
@@ -247,6 +247,10 @@ def main(screen):
             cresult = r.recognize(capData)
 
             if len(cresult) != 0:
+                screen.addstr(15,0," "*100)
+                screen.addstr(16,0," "*100)
+                screen.addstr(17,0," "*100)
+                screen.addstr(18,0," "*100)
                 cprint("Classification Result: " + str(cresult),15,15)
                 bestCount = 0
                 for item in cresult:

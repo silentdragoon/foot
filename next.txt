@@ -1,1 +1,1 @@
-search --name PDF key ctrl+Page_Down
+search --name Gesture key ctrl+Page_Down
